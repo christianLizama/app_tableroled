@@ -16,7 +16,8 @@ class AnunciosPage extends StatefulWidget {
 
 class _AnunciosPageState extends State<AnunciosPage> {
   final _messageController = TextEditingController();
-  List<int> _colors = List.filled(16 * 32, 0xFF000000); // Inicializa la matriz de colores
+  List<int> _colors =
+      List.filled(16 * 32, 0xFF000000); // Inicializa la matriz de colores
 
   Color _currentColor = Colors.black;
   Timer? _timer;
@@ -71,7 +72,8 @@ class _AnunciosPageState extends State<AnunciosPage> {
         _colors = List.filled(16 * 32, 0xFF000000);
         _drawMessage(text, _offset);
         _offset--;
-        if (_offset < -32) { // Hasta que todo el texto haya pasado por completo
+        if (_offset < -32) {
+          // Hasta que todo el texto haya pasado por completo
           _offset = text.length * 8;
         }
       });
@@ -80,7 +82,8 @@ class _AnunciosPageState extends State<AnunciosPage> {
 
   void _drawMessage(String message, int offset) {
     for (int i = 0; i < message.length; i++) {
-      _drawCharacter(message[i], 32 - (i * 8 + offset), 4); // Ajuste para desplazamiento de derecha a izquierda
+      _drawCharacter(message[i], 32 - (i * 8 + offset),
+          4); // Ajuste para desplazamiento de derecha a izquierda
     }
   }
 
@@ -160,6 +163,30 @@ class _AnunciosPageState extends State<AnunciosPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Guardar Anuncios'),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const SizedBox(
+              height: 120, // Set the height you want here
+              child: DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Text('Drawer Header'),
+              ),
+            ),
+            ListTile(
+              title: const Text('Mis anuncios'),
+              onTap: () {
+                // Update the state of the app
+                // Then close the drawer
+                Navigator.pushNamed(context, '/misAnuncios');
+              },
+            ),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
