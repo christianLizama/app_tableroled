@@ -4,6 +4,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../models/anuncio.dart';
 import '../utils/network_utils.dart';
 import 'dart:async';
+import 'package:http/http.dart' as http;
 
 class AnunciosPage extends StatefulWidget {
   const AnunciosPage({super.key});
@@ -22,6 +23,8 @@ class _AnunciosPageState extends State<AnunciosPage> {
   Color _currentColor = Colors.black;
   Timer? _timer;
   int _offset = 0;
+
+  String _response = "...";
 
   @override
   void dispose() {
@@ -158,6 +161,27 @@ class _AnunciosPageState extends State<AnunciosPage> {
     });
   }
 
+  Future<void> _sendRequest(String message) async {
+    final response = await http.post(
+      Uri.parse(
+          'http://192.168.4.1/post'), // La IP por defecto del AP del NodeMCU es 192.168.4.1
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+      body: message,
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        _response = response.body;
+      });
+    } else {
+      setState(() {
+        _response = "Error en la solicitud: ${response.statusCode}";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -228,6 +252,7 @@ class _AnunciosPageState extends State<AnunciosPage> {
                 itemCount: 16 * 32,
               ),
             ),
+            Text(_response),
             ElevatedButton(
               onPressed: () => _drawText(_messageController.text),
               child: const Text('Escribir'),
@@ -235,6 +260,10 @@ class _AnunciosPageState extends State<AnunciosPage> {
             ElevatedButton(
               onPressed: saveAnuncio,
               child: const Text('Guardar'),
+            ),
+            ElevatedButton(
+              onPressed: () => _sendRequest(_messageController.text),
+              child: const Text('Mostrar en tablero LED'),
             ),
           ],
         ),
