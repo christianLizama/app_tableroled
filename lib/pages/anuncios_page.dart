@@ -162,12 +162,11 @@ class _AnunciosPageState extends State<AnunciosPage> {
   }
 
   Future<void> _sendRequest(String message) async {
+    final url =
+        Uri.parse('http://192.168.4.1/'); // Reemplaza con la IP de tu ESP32
     final response = await http.post(
-      Uri.parse(
-          'http://192.168.4.1/post'), // La IP por defecto del AP del NodeMCU es 192.168.4.1
-      headers: {
-        'Content-Type': 'text/plain',
-      },
+      url,
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: message,
     );
 
