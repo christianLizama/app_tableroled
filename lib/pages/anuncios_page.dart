@@ -185,6 +185,14 @@ class _AnunciosPageState extends State<AnunciosPage> {
                 Navigator.pushNamed(context, '/misAnuncios');
               },
             ),
+            ListTile(
+              title: const Text('Wifi'),
+              onTap: () {
+                // Update the state of the app
+                // Then close the drawer
+                Navigator.pushNamed(context, '/wifiConnect');
+              },
+            ),
           ],
         ),
       ),

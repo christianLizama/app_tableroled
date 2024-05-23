@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:tablero_led/pages/misAnuncios_page.dart';
 import 'package:tablero_led/pages/page_404.dart';
+import 'package:tablero_led/pages/wifiConnectPage.dart';
 import 'pages/anuncios_page.dart';
 
 void main() async {
@@ -21,6 +22,7 @@ class MainApp extends StatelessWidget {
   final _routes = {
     '/': (context) => const AnunciosPage(),
     '/misAnuncios': (context) => const MisAnunciosPage(),
+    '/wifiConnect': (context) => const WifiConnectPage(),
   };
   @override
   Widget build(BuildContext context) {
