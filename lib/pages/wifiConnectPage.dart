@@ -9,8 +9,10 @@ class WifiConnectPage extends StatefulWidget {
 }
 
 class _WifiConnectPageState extends State<WifiConnectPage> {
-  final TextEditingController _ssidController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _ssidController =
+      TextEditingController(text: 'MiAccessPoint');
+  final TextEditingController _passwordController =
+      TextEditingController(text: '12345678');
 
   Future<void> connect() async {
     String ssid = _ssidController.text;
