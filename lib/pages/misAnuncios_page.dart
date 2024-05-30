@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:tablero_led/pages/addAnuncioPage.dart';
 
 class MisAnunciosPage extends StatefulWidget {
   const MisAnunciosPage({super.key});
@@ -10,8 +11,7 @@ class MisAnunciosPage extends StatefulWidget {
 }
 
 class _MisAnunciosPageState extends State<MisAnunciosPage> {
-  final TextEditingController _controller = TextEditingController();
-  final List<String> _anuncios = [];
+  final List<Map<String, String>> _anuncios = [];
 
   @override
   void initState() {
@@ -21,12 +21,58 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
 
   Future<void> cargarAnuncios() async {
     var get = await http.get(
-      Uri.parse('http://192.168.1.94:3030/texto/getAll'),
+      Uri.parse('http://192.168.0.11:3030/texto/getAll'),
     );
     List<dynamic> data = json.decode(get.body);
     setState(() {
-      _anuncios.addAll(data.map((item) => item['texto'].toString()).toList());
+      _anuncios
+        ..clear()
+        ..addAll(data
+            .map((item) => {
+                  'texto': item['texto'].toString(),
+                  'color': item['color'].toString()
+                })
+            .toList());
     });
+  }
+
+  Future<void> _sendRequest(String message, String colorName) async {
+    final url = Uri.parse('http://192.168.4.1/');
+    message = message.toUpperCase();
+    String body = 'message=$message&color=$colorName';
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        print(response.body);
+      });
+    } else {
+      setState(() {
+        print("Error en la solicitud: ${response.statusCode}");
+      });
+    }
+  }
+
+  Color getColorFromName(String colorName) {
+    switch (colorName) {
+      case 'blanco':
+        return Colors.white;
+      case 'rojo':
+        return Colors.red;
+      case 'verde':
+        return Colors.green;
+      case 'azul':
+        return Colors.blue;
+      case 'amarillo':
+        return Colors.yellow;
+      default:
+        return Colors.black; // Default color if no match is found
+    }
   }
 
   @override
@@ -37,38 +83,15 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
       ),
       body: Column(
         children: <Widget>[
-          TextField(
-            controller: _controller,
-            decoration: const InputDecoration(
-              labelText: 'Introduce tu anuncio aquí',
-            ),
-          ),
           ElevatedButton(
-            child: const Text('Guardar anuncio'),
-            onPressed: () async {
-              setState(() {
-                _anuncios.add(_controller.text);
+            child: const Text('Añadir nuevo anuncio'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddAnuncioPage()),
+              ).then((_) {
+                cargarAnuncios();
               });
-              var get = await http.get(
-                Uri.parse('http://192.168.1.94:3030/texto/getAll'),
-              );
-              print(get.body);
-              var response = await http.post(
-                Uri.parse('http://192.168.1.94:3030/texto/add'),
-                headers: {"Content-Type": "application/json"},
-                body: json.encode({'texto': _controller.text}),
-              );
-
-              print('Status code: ${response.statusCode}');
-              print('Response: $response');
-
-              if (response.statusCode == 201) {
-                print('Anuncio subido con éxito');
-              } else {
-                print('Error al subir el anuncio');
-              }
-
-              _controller.clear();
             },
           ),
           Expanded(
@@ -76,7 +99,18 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
               itemCount: _anuncios.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(_anuncios[index]),
+                  title: Text(
+                    _anuncios[index]['texto']!,
+                    style: TextStyle(
+                        color: getColorFromName(_anuncios[index]['color']!)),
+                  ),
+                  trailing: ElevatedButton(
+                    onPressed: () => _sendRequest(
+                      _anuncios[index]['texto']!,
+                      _anuncios[index]['color']!,
+                    ),
+                    child: const Text('Mostrar'),
+                  ),
                 );
               },
             ),

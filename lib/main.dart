@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:tablero_led/pages/addAnuncioPage.dart';
 import 'package:tablero_led/pages/misAnuncios_page.dart';
 import 'package:tablero_led/pages/page_404.dart';
 import 'package:tablero_led/pages/wifiConnectPage.dart';
@@ -23,6 +24,7 @@ class MainApp extends StatelessWidget {
     '/': (context) => const AnunciosPage(),
     '/misAnuncios': (context) => const MisAnunciosPage(),
     '/wifiConnect': (context) => const WifiConnectPage(),
+    '/addAnuncio': (context) => const AddAnuncioPage(),
   };
   @override
   Widget build(BuildContext context) {
