@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AnunciosPage extends StatefulWidget {
   const AnunciosPage({super.key});
@@ -13,30 +15,31 @@ class AnunciosPage extends StatefulWidget {
 
 class _AnunciosPageState extends State<AnunciosPage> {
   final _messageController = TextEditingController();
-  String _response = "...";
+  final String _response = "...";
   Color _currentColor = Colors.black;
 
   Future<void> _sendRequest(String message, String colorName) async {
-    final url = Uri.parse('http://192.168.4.1/');
-    //mandar message en mayusculas
-    message = message.toUpperCase();
-    // Construye el cuerpo de la solicitud
-    String body = 'message=$message&color=$colorName';
+    try {
+      final response = await http.post(
+        Uri.parse('${dotenv.env['URL']}/texto/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'message': message,
+          'color': colorName,
+        }),
+      );
 
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: body,
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _response = response.body;
-      });
-    } else {
-      setState(() {
-        _response = "Error en la solicitud: ${response.statusCode}";
-      });
+      if (response.statusCode == 200) {
+        // Si el servidor devuelve una respuesta OK, parseamos el JSON
+        print('Mensaje enviado al ESP32: ${response.body}');
+      } else {
+        // Si el servidor no devuelve una respuesta OK, lanzamos un error
+        print('Falló la solicitud: ${response.body}');
+      }
+    } catch (e) {
+      print('Error al enviar el mensaje: $e');
     }
   }
 

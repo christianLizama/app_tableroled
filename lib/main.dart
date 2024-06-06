@@ -6,10 +6,11 @@ import 'package:tablero_led/pages/misAnuncios_page.dart';
 import 'package:tablero_led/pages/page_404.dart';
 import 'package:tablero_led/pages/wifiConnectPage.dart';
 import 'pages/anuncios_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await dotenv.load(fileName: ".env");
   final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
   Hive.init(appDocumentDir.path);
 

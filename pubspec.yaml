@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_colorpicker: ^1.0.3
+  flutter_dotenv: ^5.1.0
   hive: ^2.2.3
   hive_generator: ^2.0.1
   http: ^1.2.1
@@ -32,3 +33,6 @@ dependency_overrides:
       
 flutter:
   uses-material-design: true
+
+  assets: 
+    - .env

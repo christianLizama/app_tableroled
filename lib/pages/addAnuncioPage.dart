@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class AddAnuncioPage extends StatefulWidget {
   const AddAnuncioPage({super.key});
 
   @override
-  _AddAnuncioPageState createState() => _AddAnuncioPageState();
+  createState() => _AddAnuncioPageState();
 }
 
 class _AddAnuncioPageState extends State<AddAnuncioPage> {
@@ -15,7 +16,7 @@ class _AddAnuncioPageState extends State<AddAnuncioPage> {
 
   Future<void> guardarAnuncio() async {
     var response = await http.post(
-      Uri.parse('http://192.168.0.11:3030/texto/add'),
+      Uri.parse('${dotenv.env['URL']}/texto/add'),
       headers: {"Content-Type": "application/json"},
       body: json.encode({
         'texto': _controller.text,

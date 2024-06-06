@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:tablero_led/pages/addAnuncioPage.dart';
 
@@ -7,7 +8,7 @@ class MisAnunciosPage extends StatefulWidget {
   const MisAnunciosPage({super.key});
 
   @override
-  _MisAnunciosPageState createState() => _MisAnunciosPageState();
+  createState() => _MisAnunciosPageState();
 }
 
 class _MisAnunciosPageState extends State<MisAnunciosPage> {
@@ -21,7 +22,7 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
 
   Future<void> cargarAnuncios() async {
     var get = await http.get(
-      Uri.parse('http://192.168.0.11:3030/texto/getAll'),
+      Uri.parse('${dotenv.env['URL']}/texto/getAll'),
     );
     List<dynamic> data = json.decode(get.body);
     setState(() {
@@ -37,24 +38,27 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
   }
 
   Future<void> _sendRequest(String message, String colorName) async {
-    final url = Uri.parse('http://192.168.4.1/');
-    message = message.toUpperCase();
-    String body = 'message=$message&color=$colorName';
+    try {
+      final response = await http.post(
+        Uri.parse('${dotenv.env['URL']}/texto/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'message': message,
+          'color': colorName,
+        }),
+      );
 
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: body,
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        print(response.body);
-      });
-    } else {
-      setState(() {
-        print("Error en la solicitud: ${response.statusCode}");
-      });
+      if (response.statusCode == 200) {
+        // Si el servidor devuelve una respuesta OK, parseamos el JSON
+        print('Mensaje enviado al ESP32: ${response.body}');
+      } else {
+        // Si el servidor no devuelve una respuesta OK, lanzamos un error
+        print('Falló la solicitud: ${response.body}');
+      }
+    } catch (e) {
+      print('Error al enviar el mensaje: $e');
     }
   }
 
