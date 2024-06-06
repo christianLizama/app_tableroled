@@ -10,7 +10,7 @@ class WifiConnectPage extends StatefulWidget {
 
 class _WifiConnectPageState extends State<WifiConnectPage> {
   final TextEditingController _ssidController =
-      TextEditingController(text: 'MiAccessPoint');
+      TextEditingController(text: 'nodemcu');
   final TextEditingController _passwordController =
       TextEditingController(text: '12345678');
 
@@ -31,6 +31,8 @@ class _WifiConnectPageState extends State<WifiConnectPage> {
 
     if (isConnected) {
       print('Conectado a $ssid');
+      //enviar a vista wifiArduinoPage
+      Navigator.pushNamed(context, '/wifiArduino');
     } else {
       print('No se pudo conectar a $ssid');
     }
