@@ -6,6 +6,7 @@ import 'package:tablero_led/pages/misAnuncios_page.dart';
 import 'package:tablero_led/pages/page_404.dart';
 import 'package:tablero_led/pages/wifiConnectPage.dart';
 import 'package:tablero_led/pages/wifiArduinoPage.dart';
+import 'package:tablero_led/pages/nuevo_anuncio_page.dart';
 import 'pages/anuncios_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -27,7 +28,8 @@ class MainApp extends StatelessWidget {
     '/misAnuncios': (context) => const MisAnunciosPage(),
     '/wifiConnect': (context) => const WifiConnectPage(),
     '/addAnuncio': (context) => const AddAnuncioPage(),
-    '/wifiArduino': (context) => const WiFiScreen()
+    '/wifiArduino': (context) => const WiFiScreen(),
+    '/nuevoAnuncio': (context) => const NuevoAnuncioScreen(),
   };
   @override
   Widget build(BuildContext context) {
