@@ -108,6 +108,14 @@ class _AnunciosPageState extends State<AnunciosPage> {
                 Navigator.pushNamed(context, '/wifiArduino');
               },
             ),
+            ListTile(
+              title: const Text('Nuevo anuncio'),
+              onTap: () {
+                // Update the state of the app
+                // Then close the drawer
+                Navigator.pushNamed(context, '/nuevoAnuncio');
+              },
+            ),
           ],
         ),
       ),
