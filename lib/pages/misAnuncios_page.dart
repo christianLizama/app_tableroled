@@ -100,6 +100,14 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis anuncios'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              cargarAnuncios();
+            },
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
