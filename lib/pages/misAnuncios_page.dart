@@ -13,11 +13,14 @@ class MisAnunciosPage extends StatefulWidget {
 
 class _MisAnunciosPageState extends State<MisAnunciosPage> {
   final List<Map<String, String>> _anuncios = [];
+  List<Map<String, String>> _filteredAnuncios = [];
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     cargarAnuncios();
+    _searchController.addListener(_filterAnuncios);
   }
 
   Future<void> cargarAnuncios() async {
@@ -34,6 +37,17 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
                   'color': item['color'].toString()
                 })
             .toList());
+      _filteredAnuncios = List.from(_anuncios);  // Actualiza la lista filtrada con los anuncios cargados
+    });
+  }
+
+  void _filterAnuncios() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredAnuncios = _anuncios
+          .where((anuncio) =>
+              anuncio['texto']!.toLowerCase().contains(query))
+          .toList();
     });
   }
 
@@ -87,33 +101,51 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
       ),
       body: Column(
         children: <Widget>[
-          ElevatedButton(
-            child: const Text('Añadir nuevo anuncio'),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AddAnuncioPage()),
-              ).then((_) {
-                cargarAnuncios();
-              });
-            },
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                labelText: 'Buscar',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _anuncios.length,
+              itemCount: _filteredAnuncios.length,
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text(
-                    _anuncios[index]['texto']!,
+                    _filteredAnuncios[index]['texto']!,
                     style: TextStyle(
-                        color: getColorFromName(_anuncios[index]['color']!)),
+                        color: getColorFromName(_filteredAnuncios[index]['color']!)),
                   ),
-                  trailing: ElevatedButton(
-                    onPressed: () => _sendRequest(
-                      _anuncios[index]['texto']!,
-                      _anuncios[index]['color']!,
-                    ),
-                    child: const Text('Mostrar'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.blue,
+                        child: IconButton(
+                          icon: const Icon(Icons.play_arrow, color: Colors.white),
+                          onPressed: () => _sendRequest(
+                            _filteredAnuncios[index]['texto']!,
+                            _filteredAnuncios[index]['color']!,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8), // Espacio entre los botones
+                      CircleAvatar(
+                        backgroundColor: Colors.amber,
+                        child: IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.white),
+                          onPressed: () {
+                            // Aquí va la lógica para editar el anuncio
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -121,6 +153,23 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddAnuncioPage()),
+          ).then((_) {
+            cargarAnuncios();
+          });
+        },
+        label: const Text(
+          'Nuevo anuncio',
+          style: TextStyle(color: Colors.white),
+        ),
+        icon: const Icon(Icons.add, color: Colors.white),
+        backgroundColor: Colors.blue,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
