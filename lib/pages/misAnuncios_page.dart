@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:tablero_led/pages/nuevo_anuncio_page.dart';
+import 'package:tablero_led/pages/editar_anuncio_page.dart'; // Importa la nueva pantalla de edición
 
 class MisAnunciosPage extends StatefulWidget {
   const MisAnunciosPage({super.key});
@@ -33,6 +34,7 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
         ..clear()
         ..addAll(data
             .map((item) => {
+                  'id': item['_id'].toString(),
                   'texto': item['texto'].toString(),
                   'color': item['color'].toString()
                 })
@@ -183,7 +185,17 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
                         child: IconButton(
                           icon: const Icon(Icons.edit, color: Colors.white),
                           onPressed: () {
-                            // Aquí va la lógica para editar el anuncio
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditarAnuncioScreen(
+                                    texto: _filteredAnuncios[index]['texto']!,
+                                    color: _filteredAnuncios[index]['color']!,
+                                    id: _filteredAnuncios[index]['id']!),
+                              ),
+                            ).then((_) {
+                              cargarAnuncios();
+                            });
                           },
                         ),
                       ),
