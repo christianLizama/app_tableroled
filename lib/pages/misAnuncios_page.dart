@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:tablero_led/pages/addAnuncioPage.dart';
+import 'package:tablero_led/pages/nuevo_anuncio_page.dart';
 
 class MisAnunciosPage extends StatefulWidget {
   const MisAnunciosPage({super.key});
@@ -37,7 +37,8 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
                   'color': item['color'].toString()
                 })
             .toList());
-      _filteredAnuncios = List.from(_anuncios);  // Actualiza la lista filtrada con los anuncios cargados
+      _filteredAnuncios = List.from(
+          _anuncios); // Actualiza la lista filtrada con los anuncios cargados
     });
   }
 
@@ -45,8 +46,7 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredAnuncios = _anuncios
-          .where((anuncio) =>
-              anuncio['texto']!.toLowerCase().contains(query))
+          .where((anuncio) => anuncio['texto']!.toLowerCase().contains(query))
           .toList();
     });
   }
@@ -99,6 +99,46 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
       appBar: AppBar(
         title: const Text('Mis anuncios'),
       ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const SizedBox(
+              height: 120, // Set the height you want here
+              child: DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Text('Drawer Header'),
+              ),
+            ),
+            ListTile(
+              title: const Text('Mis anuncios'),
+              onTap: () {
+                // Update the state of the app
+                // Then close the drawer
+                Navigator.pushNamed(context, '/');
+              },
+            ),
+            ListTile(
+              title: const Text('Wifi'),
+              onTap: () {
+                // Update the state of the app
+                // Then close the drawer
+                Navigator.pushNamed(context, '/wifiConnect');
+              },
+            ),
+            ListTile(
+              title: const Text('Wifi arduino'),
+              onTap: () {
+                // Update the state of the app
+                // Then close the drawer
+                Navigator.pushNamed(context, '/wifiArduino');
+              },
+            ),
+          ],
+        ),
+      ),
       body: Column(
         children: <Widget>[
           Padding(
@@ -120,7 +160,8 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
                   title: Text(
                     _filteredAnuncios[index]['texto']!,
                     style: TextStyle(
-                        color: getColorFromName(_filteredAnuncios[index]['color']!)),
+                        color: getColorFromName(
+                            _filteredAnuncios[index]['color']!)),
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -128,7 +169,8 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
                       CircleAvatar(
                         backgroundColor: Colors.blue,
                         child: IconButton(
-                          icon: const Icon(Icons.play_arrow, color: Colors.white),
+                          icon:
+                              const Icon(Icons.play_arrow, color: Colors.white),
                           onPressed: () => _sendRequest(
                             _filteredAnuncios[index]['texto']!,
                             _filteredAnuncios[index]['color']!,
@@ -157,7 +199,7 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddAnuncioPage()),
+            MaterialPageRoute(builder: (context) => const NuevoAnuncioScreen()),
           ).then((_) {
             cargarAnuncios();
           });

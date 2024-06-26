@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:tablero_led/pages/addAnuncioPage.dart';
 import 'package:tablero_led/pages/misAnuncios_page.dart';
 import 'package:tablero_led/pages/page_404.dart';
 import 'package:tablero_led/pages/wifiConnectPage.dart';
 import 'package:tablero_led/pages/wifiArduinoPage.dart';
 import 'package:tablero_led/pages/nuevo_anuncio_page.dart';
-import 'pages/anuncios_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
@@ -24,12 +22,10 @@ void main() async {
 class MainApp extends StatelessWidget {
   MainApp({super.key});
   final _routes = {
-    '/': (context) => const AnunciosPage(),
-    '/misAnuncios': (context) => const MisAnunciosPage(),
+    '/': (context) => const MisAnunciosPage(),
     '/wifiConnect': (context) => const WifiConnectPage(),
-    '/addAnuncio': (context) => const AddAnuncioPage(),
     '/wifiArduino': (context) => const WiFiScreen(),
-    '/nuevoAnuncio': (context) => const NuevoAnuncioScreen(),
+    '/addAnuncio': (context) => const NuevoAnuncioScreen(),
   };
   @override
   Widget build(BuildContext context) {

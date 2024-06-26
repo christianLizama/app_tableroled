@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
-
 class NuevoAnuncioScreen extends StatefulWidget {
   const NuevoAnuncioScreen({super.key});
 
@@ -119,11 +118,15 @@ class _NuevoAnuncioScreenState extends State<NuevoAnuncioScreen> {
             const SizedBox(height: 16),
             Center(
               child: ElevatedButton(
-                onPressed: () { 
+                onPressed: () {
                   // Lógica para guardar el anuncio
+                  print('Texto: ${_anuncioController.text}');
+                  print('Color: ${getColorName(_selectedColor)}');
+                  guardarAnuncio();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue, // Cambia el color del botón aquí
+                  backgroundColor:
+                      Colors.blue, // Cambia el color del botón aquí
                 ),
                 child: const Text(
                   'Guardar anuncio',
