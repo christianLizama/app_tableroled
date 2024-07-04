@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:tablero_led/pages/anuncios_page.dart';
+import 'package:tablero_led/pages/misAnuncios_page.dart';
 
 class WiFiScreen extends StatefulWidget {
   const WiFiScreen({Key? key});
@@ -143,13 +143,13 @@ class _WiFiScreenState extends State<WiFiScreen> {
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: 'ssid=$ssid&password=$password',
     );
-    
+
     if (!mounted) return;
     if (response.statusCode == 200) {
       print('Datos enviados exitosamente!');
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const AnunciosPage()),
+        MaterialPageRoute(builder: (context) => const MisAnunciosPage()),
       );
     } else {
       // Mostrar diálogo de error

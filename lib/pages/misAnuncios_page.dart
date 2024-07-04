@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:tablero_led/pages/addAnuncioPage.dart';
+import 'package:tablero_led/pages/nuevo_anuncio_page.dart';
+import 'package:tablero_led/pages/editar_anuncio_page.dart'; // Importa la nueva pantalla de edición
 
 class MisAnunciosPage extends StatefulWidget {
   const MisAnunciosPage({super.key});
@@ -13,11 +14,14 @@ class MisAnunciosPage extends StatefulWidget {
 
 class _MisAnunciosPageState extends State<MisAnunciosPage> {
   final List<Map<String, String>> _anuncios = [];
+  List<Map<String, String>> _filteredAnuncios = [];
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     cargarAnuncios();
+    _searchController.addListener(_filterAnuncios);
   }
 
   Future<void> cargarAnuncios() async {
@@ -30,10 +34,22 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
         ..clear()
         ..addAll(data
             .map((item) => {
+                  'id': item['_id'].toString(),
                   'texto': item['texto'].toString(),
                   'color': item['color'].toString()
                 })
             .toList());
+      _filteredAnuncios = List.from(
+          _anuncios); // Actualiza la lista filtrada con los anuncios cargados
+    });
+  }
+
+  void _filterAnuncios() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredAnuncios = _anuncios
+          .where((anuncio) => anuncio['texto']!.toLowerCase().contains(query))
+          .toList();
     });
   }
 
@@ -84,36 +100,114 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis anuncios'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              cargarAnuncios();
+            },
+          ),
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const SizedBox(
+              height: 120, // Set the height you want here
+              child: DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Text('Drawer Header'),
+              ),
+            ),
+            ListTile(
+              title: const Text('Mis anuncios'),
+              onTap: () {
+                // Update the state of the app
+                // Then close the drawer
+                Navigator.pushNamed(context, '/');
+              },
+            ),
+            ListTile(
+              title: const Text('Wifi'),
+              onTap: () {
+                // Update the state of the app
+                // Then close the drawer
+                Navigator.pushNamed(context, '/wifiConnect');
+              },
+            ),
+            ListTile(
+              title: const Text('Wifi arduino'),
+              onTap: () {
+                // Update the state of the app
+                // Then close the drawer
+                Navigator.pushNamed(context, '/wifiArduino');
+              },
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: <Widget>[
-          ElevatedButton(
-            child: const Text('Añadir nuevo anuncio'),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AddAnuncioPage()),
-              ).then((_) {
-                cargarAnuncios();
-              });
-            },
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                labelText: 'Buscar',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _anuncios.length,
+              itemCount: _filteredAnuncios.length,
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text(
-                    _anuncios[index]['texto']!,
+                    _filteredAnuncios[index]['texto']!,
                     style: TextStyle(
-                        color: getColorFromName(_anuncios[index]['color']!)),
+                        color: getColorFromName(
+                            _filteredAnuncios[index]['color']!)),
                   ),
-                  trailing: ElevatedButton(
-                    onPressed: () => _sendRequest(
-                      _anuncios[index]['texto']!,
-                      _anuncios[index]['color']!,
-                    ),
-                    child: const Text('Mostrar'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.blue,
+                        child: IconButton(
+                          icon:
+                              const Icon(Icons.play_arrow, color: Colors.white),
+                          onPressed: () => _sendRequest(
+                            _filteredAnuncios[index]['texto']!,
+                            _filteredAnuncios[index]['color']!,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8), // Espacio entre los botones
+                      CircleAvatar(
+                        backgroundColor: Colors.amber,
+                        child: IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.white),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditarAnuncioScreen(
+                                    texto: _filteredAnuncios[index]['texto']!,
+                                    color: _filteredAnuncios[index]['color']!,
+                                    id: _filteredAnuncios[index]['id']!),
+                              ),
+                            ).then((_) {
+                              cargarAnuncios();
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -121,6 +215,23 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NuevoAnuncioScreen()),
+          ).then((_) {
+            cargarAnuncios();
+          });
+        },
+        label: const Text(
+          'Nuevo anuncio',
+          style: TextStyle(color: Colors.white),
+        ),
+        icon: const Icon(Icons.add, color: Colors.white),
+        backgroundColor: Colors.blue,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
