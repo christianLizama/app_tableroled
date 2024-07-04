@@ -6,15 +6,15 @@ import 'package:tablero_led/pages/nuevo_anuncio_page.dart';
 import 'package:tablero_led/pages/editar_anuncio_page.dart'; // Importa la nueva pantalla de edición
 
 class MisAnunciosPage extends StatefulWidget {
-  const MisAnunciosPage({super.key});
+  const MisAnunciosPage({Key? key}) : super(key: key);
 
   @override
-  createState() => _MisAnunciosPageState();
+  _MisAnunciosPageState createState() => _MisAnunciosPageState();
 }
 
 class _MisAnunciosPageState extends State<MisAnunciosPage> {
-  final List<Map<String, String>> _anuncios = [];
-  List<Map<String, String>> _filteredAnuncios = [];
+  final List<Map<String, dynamic>> _anuncios = [];
+  List<Map<String, dynamic>> _filteredAnuncios = [];
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -36,7 +36,8 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
             .map((item) => {
                   'id': item['_id'].toString(),
                   'texto': item['texto'].toString(),
-                  'color': item['color'].toString()
+                  'color': item['color'].toString(),
+                  'velocidad': item['velocidad'] as int,
                 })
             .toList());
       _filteredAnuncios = List.from(
@@ -48,21 +49,22 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredAnuncios = _anuncios
-          .where((anuncio) => anuncio['texto']!.toLowerCase().contains(query))
+          .where((anuncio) => anuncio['texto'].toLowerCase().contains(query))
           .toList();
     });
   }
 
-  Future<void> _sendRequest(String message, String colorName) async {
+  Future<void> _sendRequest(String message, String colorName, int velocidad) async {
     try {
       final response = await http.post(
         Uri.parse('${dotenv.env['URL']}/texto/send'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{
+        body: jsonEncode(<String, dynamic>{
           'message': message,
           'color': colorName,
+          'velocidad': velocidad.toString(),
         }),
       );
 
@@ -91,7 +93,7 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
       case 'amarillo':
         return Colors.yellow;
       default:
-        return Colors.black; // Default color if no match is found
+        return Colors.black; // Color predeterminado si no hay coincidencia
     }
   }
 
@@ -114,7 +116,7 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             const SizedBox(
-              height: 120, // Set the height you want here
+              height: 120, // Ajusta la altura según lo necesites
               child: DrawerHeader(
                 decoration: BoxDecoration(
                   color: Colors.blue,
@@ -125,24 +127,24 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
             ListTile(
               title: const Text('Mis anuncios'),
               onTap: () {
-                // Update the state of the app
-                // Then close the drawer
+                // Actualiza el estado de la aplicación
+                // Luego cierra el drawer
                 Navigator.pushNamed(context, '/');
               },
             ),
             ListTile(
               title: const Text('Wifi'),
               onTap: () {
-                // Update the state of the app
-                // Then close the drawer
+                // Actualiza el estado de la aplicación
+                // Luego cierra el drawer
                 Navigator.pushNamed(context, '/wifiConnect');
               },
             ),
             ListTile(
               title: const Text('Wifi arduino'),
               onTap: () {
-                // Update the state of the app
-                // Then close the drawer
+                // Actualiza el estado de la aplicación
+                // Luego cierra el drawer
                 Navigator.pushNamed(context, '/wifiArduino');
               },
             ),
@@ -184,6 +186,7 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
                           onPressed: () => _sendRequest(
                             _filteredAnuncios[index]['texto']!,
                             _filteredAnuncios[index]['color']!,
+                            _filteredAnuncios[index]['velocidad'] as int,
                           ),
                         ),
                       ),
@@ -199,11 +202,52 @@ class _MisAnunciosPageState extends State<MisAnunciosPage> {
                                 builder: (context) => EditarAnuncioScreen(
                                     texto: _filteredAnuncios[index]['texto']!,
                                     color: _filteredAnuncios[index]['color']!,
-                                    id: _filteredAnuncios[index]['id']!),
+                                    id: _filteredAnuncios[index]['id']!, 
+                                    velocidad: _filteredAnuncios[index]['velocidad'] as int),
                               ),
                             ).then((_) {
                               cargarAnuncios();
                             });
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      CircleAvatar(
+                        backgroundColor: Colors.red,
+                        child: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.white),
+                          onPressed: () async {
+                            // Obtén una referencia segura al BuildContext antes de la función asíncrona
+                            final scaffoldContext =
+                                ScaffoldMessenger.of(context);
+
+                            final response = await http.delete(
+                              Uri.parse(
+                                  '${dotenv.env['URL']}/texto/delete/${_filteredAnuncios[index]['id']}'),
+                            );
+
+                            if (response.statusCode == 200) {
+                              // Si la solicitud fue exitosa (código de estado 200),
+                              // muestra un SnackBar indicando el éxito.
+                              scaffoldContext.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Eliminación exitosa'),
+                                  duration: Duration(
+                                      seconds: 2), // Duración del SnackBar
+                                ),
+                              );
+                              cargarAnuncios(); // Cargar anuncios después del éxito
+                            } else {
+                              // Si la solicitud falló, muestra el mensaje de error en la consola.
+                              scaffoldContext.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Error al eliminar el anuncio, verifique la conexión a internet'),
+                                  duration: Duration(
+                                      seconds: 2), // Duración del SnackBar
+                                ),
+                              );
+                              // Aquí podrías mostrar otro tipo de feedback al usuario si lo deseas.
+                            }
                           },
                         ),
                       ),

@@ -5,7 +5,7 @@ class WifiConnectPage extends StatefulWidget {
   const WifiConnectPage({super.key});
 
   @override
-  _WifiConnectPageState createState() => _WifiConnectPageState();
+  createState() => _WifiConnectPageState();
 }
 
 class _WifiConnectPageState extends State<WifiConnectPage> {

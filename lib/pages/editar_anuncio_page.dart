@@ -6,14 +6,17 @@ import 'package:http/http.dart' as http;
 class EditarAnuncioScreen extends StatefulWidget {
   final String texto;
   final String color;
-  final String id; // Asume que cada anuncio tiene un ID único para identificarlo
+  final int velocidad;
+  final String
+      id; // Asume que cada anuncio tiene un ID único para identificarlo
 
   const EditarAnuncioScreen({
     required this.texto,
     required this.color,
     required this.id,
-    Key? key,
-  }) : super(key: key);
+    required this.velocidad,
+    super.key,
+  });
 
   @override
   createState() => _EditarAnuncioScreenState();
@@ -22,13 +25,14 @@ class EditarAnuncioScreen extends StatefulWidget {
 class _EditarAnuncioScreenState extends State<EditarAnuncioScreen> {
   late TextEditingController _anuncioController;
   Color _selectedColor = Colors.white;
-  double _tiempoAnuncio = 24.0;
+  double _velocidad = 1;
 
   @override
   void initState() {
     super.initState();
     _anuncioController = TextEditingController(text: widget.texto);
     _selectedColor = getColorFromName(widget.color);
+    _velocidad = widget.velocidad.toDouble();
   }
 
   Future<void> actualizarAnuncio() async {
@@ -40,9 +44,6 @@ class _EditarAnuncioScreenState extends State<EditarAnuncioScreen> {
         'color': getColorName(_selectedColor),
       }),
     );
-
-    print('Status code: ${response.statusCode}');
-    print('Response: $response');
 
     if (response.statusCode == 200) {
       print('Anuncio actualizado con éxito');
@@ -132,20 +133,39 @@ class _EditarAnuncioScreenState extends State<EditarAnuncioScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Tiempo de anuncio',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black, // Color por defecto del texto
+                ),
+                children: <TextSpan>[
+                  const TextSpan(
+                    text: 'Velocidad del anuncio: ',
+                  ),
+                  TextSpan(
+                    text: '${_velocidad.round()}',
+                    style: const TextStyle(
+                      color: Colors.red, // Cambia aquí al color que desees para el número
+                    ),
+                  ),
+                  const TextSpan(
+                    text: ' seg',
+                  ),
+                ],
+              ),
             ),
             Slider(
               activeColor: Colors.blue,
-              value: _tiempoAnuncio,
-              min: 0,
-              max: 60,
-              divisions: 60,
-              label: '${_tiempoAnuncio.round()} seg',
+              value: _velocidad,
+              min: 1,
+              max: 30,
+              divisions:
+                  29, // Ajusta las divisiones para que coincidan con min y max
               onChanged: (value) {
                 setState(() {
-                  _tiempoAnuncio = value;
+                  _velocidad = value;
                 });
               },
             ),
@@ -153,8 +173,6 @@ class _EditarAnuncioScreenState extends State<EditarAnuncioScreen> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  print('Texto: ${_anuncioController.text}');
-                  print('Color: ${getColorName(_selectedColor)}');
                   actualizarAnuncio();
                 },
                 style: ElevatedButton.styleFrom(

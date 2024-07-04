@@ -12,34 +12,46 @@ class NuevoAnuncioScreen extends StatefulWidget {
 
 class _NuevoAnuncioScreenState extends State<NuevoAnuncioScreen> {
   final TextEditingController _anuncioController = TextEditingController();
-  double _tiempoAnuncio = 24.0;
+  double _rapidezAnuncio = 30;
   Color _selectedColor = Colors.white;
 
   Future<void> guardarAnuncio() async {
+    // Guarda el contexto antes de la operación asíncrona
+    final scaffoldContext = ScaffoldMessenger.of(context);
+
     var response = await http.post(
       Uri.parse('${dotenv.env['URL']}/texto/add'),
       headers: {"Content-Type": "application/json"},
       body: json.encode({
         'texto': _anuncioController.text,
         'color': getColorName(_selectedColor),
+        'velocidad': _rapidezAnuncio.toInt(),
       }),
     );
 
-    print('Status code: ${response.statusCode}');
-    print('Response: $response');
+    if (!mounted) return; // Verifica si el widget sigue montado
 
     if (response.statusCode == 201) {
-      print('Anuncio subido con éxito');
-      Navigator.pop(context);
+      // Si el anuncio se subió exitosamente (código de estado 201),
+      // muestra un SnackBar indicando éxito.
+      scaffoldContext.showSnackBar(
+        const SnackBar(
+          content: Text('Anuncio subido con éxito'),
+          duration: Duration(seconds: 2), // Duración del SnackBar
+        ),
+      );
+      Navigator.pop(context); // Cierra la pantalla actual
     } else {
-      print('Error al subir el anuncio');
+      print('Error al subir anuncio: ${response.statusCode}');
+      // Si ocurrió un error al subir el anuncio, muestra un mensaje de error.
+      scaffoldContext.showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Error al subir el anuncio, verifique su conexión a internet'),
+          duration: Duration(seconds: 2), // Duración del SnackBar
+        ),
+      );
     }
-  }
-
-  void _selectColor(Color color) {
-    setState(() {
-      _selectedColor = color;
-    });
   }
 
   String getColorName(Color color) {
@@ -72,7 +84,7 @@ class _NuevoAnuncioScreenState extends State<NuevoAnuncioScreen> {
           children: [
             const Text(
               'Nuevo anuncio',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -99,19 +111,19 @@ class _NuevoAnuncioScreenState extends State<NuevoAnuncioScreen> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Tiempo de anuncio',
+              'Rápidez del anuncio',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             Slider(
               activeColor: Colors.blue,
-              value: _tiempoAnuncio,
-              min: 0,
-              max: 60,
-              divisions: 60,
-              label: '${_tiempoAnuncio.round()} seg',
+              value: _rapidezAnuncio,
+              min: 1,
+              max: 30,
+              divisions: 30,
+              label: '${_rapidezAnuncio.round()} seg',
               onChanged: (value) {
                 setState(() {
-                  _tiempoAnuncio = value;
+                  _rapidezAnuncio = value;
                 });
               },
             ),
@@ -119,9 +131,6 @@ class _NuevoAnuncioScreenState extends State<NuevoAnuncioScreen> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Lógica para guardar el anuncio
-                  print('Texto: ${_anuncioController.text}');
-                  print('Color: ${getColorName(_selectedColor)}');
                   guardarAnuncio();
                 },
                 style: ElevatedButton.styleFrom(

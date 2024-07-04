@@ -4,10 +4,10 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:tablero_led/pages/misAnuncios_page.dart';
 
 class WiFiScreen extends StatefulWidget {
-  const WiFiScreen({Key? key});
+  const WiFiScreen({super.key});
 
   @override
-  _WiFiScreenState createState() => _WiFiScreenState();
+  createState() => _WiFiScreenState();
 }
 
 class _WiFiScreenState extends State<WiFiScreen> {
@@ -15,6 +15,7 @@ class _WiFiScreenState extends State<WiFiScreen> {
   final TextEditingController passwordController = TextEditingController();
   String esp32Ip = "192.168.4.1"; // IP por defecto del ESP32
   bool _passwordVisible = false;
+  bool _loading = false;
 
   final List<String> imagePaths = [
     'assets/foto1.jpg',
@@ -119,10 +120,15 @@ class _WiFiScreenState extends State<WiFiScreen> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      child: const Text(
-                        'Conectar WIFI',
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      child: _loading
+                          ? CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            )
+                          : const Text(
+                              'Conectar WIFI',
+                              style: TextStyle(fontSize: 18),
+                            ),
                     ),
                   ],
                 ),
@@ -135,8 +141,10 @@ class _WiFiScreenState extends State<WiFiScreen> {
   }
 
   Future<void> enviarDatos(String ssid, String password) async {
-    print("wifi: " + ssid);
-    print("password: " + password);
+    setState(() {
+      _loading = true;
+    });
+
     final url = Uri.parse('http://192.168.4.1/');
     final response = await http.post(
       url,
@@ -145,8 +153,11 @@ class _WiFiScreenState extends State<WiFiScreen> {
     );
 
     if (!mounted) return;
+    setState(() {
+      _loading = false;
+    });
+
     if (response.statusCode == 200) {
-      print('Datos enviados exitosamente!');
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const MisAnunciosPage()),
